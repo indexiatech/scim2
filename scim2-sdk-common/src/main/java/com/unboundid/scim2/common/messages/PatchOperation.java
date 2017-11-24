@@ -66,6 +66,9 @@ public abstract class PatchOperation
     @JsonProperty
     private final JsonNode value;
 
+    @JsonProperty
+    private JsonNode oldValue;
+
     /**
      * Create a new add patch operation.
      *
@@ -76,12 +79,13 @@ public abstract class PatchOperation
     @JsonCreator
     private AddOperation(
         @JsonProperty(value = "path") final Path path,
-        @JsonProperty(value = "value", required = true) final JsonNode value)
+        @JsonProperty(value = "value", required = true) final JsonNode value,
+        @JsonProperty(value = "oldValue") final JsonNode oldValue)
         throws ScimException
     {
       super(path);
       if(value == null || value.isNull() ||
-           ((value.isArray() || value.isObject()) && value.size() == 0))
+           (value.isObject() && value.size() == 0))
        {
          throw BadRequestException.invalidSyntax(
              "value field must not be null or an empty container");
@@ -105,6 +109,7 @@ public abstract class PatchOperation
         }
       }
       this.value = value;
+      this.oldValue = oldValue;
     }
 
     /**
@@ -145,6 +150,22 @@ public abstract class PatchOperation
      * {@inheritDoc}
      */
     @Override
+    public <T> T getOldValue(final Class<T> cls)
+            throws JsonProcessingException, ScimException, IllegalArgumentException
+    {
+      if(oldValue.isArray())
+      {
+        throw new IllegalArgumentException("Patch operation contains " +
+                "multiple values");
+      }
+      return JsonUtils.getObjectReader().treeToValue(
+              oldValue, cls);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public <T> List<T> getValues(final Class<T> cls)
         throws JsonProcessingException, ScimException
     {
@@ -155,6 +176,21 @@ public abstract class PatchOperation
       }
       return objects;
     }
+
+      /**
+       * {@inheritDoc}
+       */
+      @Override
+      public <T> List<T> getOldValues(final Class<T> cls)
+              throws JsonProcessingException, ScimException
+      {
+          ArrayList<T> objects = new ArrayList<T>(oldValue.size());
+          for(JsonNode node : oldValue)
+          {
+              objects.add(JsonUtils.getObjectReader().treeToValue(node, cls));
+          }
+          return objects;
+      }
 
     /**
      * {@inheritDoc}
@@ -288,6 +324,9 @@ public abstract class PatchOperation
     @JsonProperty
     private final JsonNode value;
 
+    @JsonProperty
+    private JsonNode oldValue;
+
     /**
      * Create a new replace patch operation.
      *
@@ -298,12 +337,13 @@ public abstract class PatchOperation
     @JsonCreator
     private ReplaceOperation(
         @JsonProperty(value = "path") final Path path,
-        @JsonProperty(value = "value", required = true) final JsonNode value)
+        @JsonProperty(value = "value", required = true) final JsonNode value,
+        @JsonProperty(value = "oldValue") final JsonNode oldValue)
         throws ScimException
     {
       super(path);
       if(value == null || value.isNull() ||
-           ((value.isArray() || value.isObject()) && value.size() == 0))
+           (value.isObject() && value.size() == 0))
        {
          throw BadRequestException.invalidSyntax(
              "value field must not be null or an empty container");
@@ -315,6 +355,7 @@ public abstract class PatchOperation
                 "replace");
       }
       this.value = value;
+      this.oldValue = oldValue;
     }
 
     /**
@@ -505,6 +546,15 @@ public abstract class PatchOperation
   }
 
   /**
+   * {@inheritDoc}
+   */
+  public <T> T getOldValue(final Class<T> cls)
+          throws JsonProcessingException, ScimException, IllegalArgumentException
+  {
+    return null;
+  }
+
+  /**
    * Retrieve all values of the patch operation.
    *
    * @param cls The Java class object used to determine the type to return.
@@ -520,6 +570,23 @@ public abstract class PatchOperation
   {
     return null;
   }
+
+    /**
+     * Retrieve all old values of the patch operation.
+     *
+     * @param cls The Java class object used to determine the type to return.
+     * @param <T> The generic type parameter of the Java class used to determine
+     *            the type to return.
+     * @return The values of the patch operation.
+     * @throws JsonProcessingException If the value can not be parsed to the
+     *         type specified by the Java class object.
+     * @throws ScimException If the path is invalid.
+     */
+    public <T> List<T> getOldValues(final Class<T> cls)
+            throws JsonProcessingException, ScimException
+    {
+        return null;
+    }
 
   /**
    * Apply this patch operation to an ObjectNode.
@@ -635,7 +702,7 @@ public abstract class PatchOperation
   {
     try
     {
-      return new AddOperation(path, value);
+      return new AddOperation(path, value, null);
     }
     catch (ScimException e)
     {
@@ -1289,7 +1356,7 @@ public abstract class PatchOperation
   {
     try
     {
-      return new ReplaceOperation(path, value);
+      return new ReplaceOperation(path, value, null);
     }
     catch (ScimException e)
     {
