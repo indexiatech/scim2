@@ -91,6 +91,14 @@ public class DeleteRequestBuilder extends RequestBuilder<DeleteRequestBuilder>
     }
   }
 
+  /**
+   * Invoke the SCIM delete request.
+   *
+   * @param <T> The type of object to return.
+   * @param cls The Java class object used to determine the type to return.
+   * @return The successfully deleted payload.
+   * @throws ScimException If an error occurred.
+   */
   public <T> T invoke(final Class<T> cls) throws ScimException
   {
     Response response = buildRequest().delete();
