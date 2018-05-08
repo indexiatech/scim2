@@ -90,4 +90,26 @@ public class DeleteRequestBuilder extends RequestBuilder<DeleteRequestBuilder>
       response.close();
     }
   }
+
+  public <T> T invoke(final Class<T> cls) throws ScimException
+  {
+    Response response = buildRequest().delete();
+    try
+    {
+      if(response.getStatusInfo().getFamily() ==
+              Response.Status.Family.SUCCESSFUL)
+      {
+        return response.readEntity(cls);
+      }
+      else
+      {
+        throw toScimException(response);
+      }
+    }
+    finally
+    {
+      // This call is idempotent.
+      response.close();
+    }
+  }
 }
