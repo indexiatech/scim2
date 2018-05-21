@@ -23,8 +23,6 @@ import com.unboundid.scim2.common.types.AttributeDefinition;
 import com.unboundid.scim2.common.annotations.Schema;
 import com.unboundid.scim2.common.annotations.Attribute;
 import com.unboundid.scim2.common.BaseScimResource;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * This object is returned whenever by SCIM when an error occurs.
@@ -44,7 +42,6 @@ public final class ErrorResponse extends BaseScimResource
   @Attribute(description = "The HTTP status code.",
       mutability = AttributeDefinition.Mutability.READ_ONLY,
       isRequired = true)
-  @JsonSerialize(using = ToStringSerializer.class)
   private final int status;
 
   /**
