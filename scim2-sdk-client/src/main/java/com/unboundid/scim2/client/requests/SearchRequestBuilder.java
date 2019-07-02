@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.unboundid.scim2.common.utils.ApiConstants.QUERY_PARAMETER_FILTER;
 import static com.unboundid.scim2.common.utils.ApiConstants.QUERY_PARAMETER_PAGE_SIZE;
@@ -276,7 +277,10 @@ public final class SearchRequestBuilder
             {
               String field = parser.getCurrentName();
               parser.nextToken();
-              if (field.equals("schemas"))
+              if (field.equals("id"))
+              {
+                resultHandler.id(UUID.fromString(parser.getValueAsString()));
+              } else if (field.equals("schemas"))
               {
                 parser.skipChildren();
               } else if (field.equals("totalResults"))

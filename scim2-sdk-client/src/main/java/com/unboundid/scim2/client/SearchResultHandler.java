@@ -19,12 +19,21 @@ package com.unboundid.scim2.client;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.util.UUID;
+
 /**
  * An interface for handling the search result response. Methods will be called
  * in the order they are received.
  */
 public interface SearchResultHandler<T>
 {
+  /**
+   * Handle the id in the search response.
+   *
+   * @param id The id.
+   */
+  void id(final UUID id);
+
   /**
    * Handle the startIndex in the search response.
    *

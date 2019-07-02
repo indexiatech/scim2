@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * A builder for ListResponses that is also a SearchResultHandler
@@ -33,10 +34,18 @@ import java.util.Map;
 public class ListResponseBuilder<T>
     implements SearchResultHandler<T>
 {
+  private UUID id;
   private Integer totalResults;
   private List<T> resources = new LinkedList<T>();
   private Integer startIndex;
   private Integer itemsPerPage;
+
+    /**
+   * {@inheritDoc}
+   */
+  public void id(final UUID id) {
+    this.id = id;
+  }
 
   /**
    * {@inheritDoc}
@@ -88,6 +97,7 @@ public class ListResponseBuilder<T>
   public ListResponse<T> build()
   {
     final Map<String,Object> properties = new LinkedHashMap<String,Object>();
+    properties.put("id", id);
     properties.put("totalResults", totalResults == null ?
       resources.size() : totalResults);
     properties.put("resources", resources);
